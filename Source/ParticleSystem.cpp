@@ -95,26 +95,58 @@ void ParticleSystem::Update(float dt)
     }
     
     
-    for (std::list<Particle*>::iterator it = mParticleList.begin(); it != mParticleList.end(); it++)
-    {
-        Particle* p = *it;
+	for (std::list<Particle*>::iterator it = mParticleList.begin(); it != mParticleList.end(); it++)
+	{
+		Particle* p = *it;
 		p->currentTime += dt;
-        p->billboard.position += p->velocity * dt;
-        
-        // @TODO 6 - Update each particle parameters
-        //
-        // Update the velocity of the particle from the acceleration in the descriptor
-        // Update the size of the particle according to its growth
-        // Update The color is also updated in 3 phases
-        //
-        //
-        // Phase 1 - Initial: from t = [0, fadeInTime] - Linearly interpolate between initial color and mid color
-        // Phase 2 - Mid:     from t = [fadeInTime, lifeTime - fadeOutTime] - color is mid color
-        // Phase 3 - End:     from t = [lifeTime - fadeOutTime, lifeTime]
-                
-        
-        // ...
-        p->billboard.color = vec4(1.0f, 1.0f, 1.0f, 1.0f); // wrong... check required implementation above
+		p->billboard.position += p->velocity * dt;
+
+		// @TODO 6 - Update each particle parameters
+		//
+		// Update the velocity of the particle from the acceleration in the descriptor
+		// Update the size of the particle according to its growth
+		// Update The color is also updated in 3 phases
+		//
+		//
+		// Phase 1 - Initial: from t = [0, fadeInTime] - Linearly interpolate between initial color and mid color
+		// Phase 2 - Mid:     from t = [fadeInTime, lifeTime - fadeOutTime] - color is mid color
+		// Phase 3 - End:     from t = [lifeTime - fadeOutTime, lifeTime]
+
+
+		// ...
+
+		// Update velocity with acceleration
+		p->velocity += mpDescriptor->acceleration * dt;
+
+		// Update size with growth
+		p->billboard.size += mpDescriptor->sizeGrowthVelocity * dt;
+
+		// Update color with time
+		vec4 color(mpDescriptor->initialColor);
+
+		// Phase 1 - Initial: from t = [0, fadeInTime]
+		if (p->currentTime <= mpDescriptor->fadeInTime)
+		{
+			float delta = (p->currentTime) / (mpDescriptor->fadeInTime);
+			color = glm::mix(mpDescriptor->initialColor, mpDescriptor->midColor, delta);
+
+		}
+		// Phase 2 - Mid:     from t = [fadeInTime, lifeTime - fadeOutTime]
+		else if (p->currentTime > mpDescriptor->fadeInTime
+			&& p->currentTime < (mpDescriptor->totalLifetime - mpDescriptor->fadeOutTime))
+		{
+			color = mpDescriptor->midColor;
+		}
+		else if (p->currentTime >= mpDescriptor->fadeOutTime
+			&& p->currentTime <= mpDescriptor->totalLifetime)
+		{
+			float delta = (p->currentTime - mpDescriptor->fadeOutTime) / (mpDescriptor->totalLifetime - mpDescriptor->fadeOutTime);
+			color = glm::mix(mpDescriptor->midColor, mpDescriptor->endColor, delta);
+
+		}
+
+        p->billboard.color = color;
+
         // ...
         
         // Do not touch code below...
