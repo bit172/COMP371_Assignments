@@ -142,6 +142,7 @@ void ParticleSystem::Update(float dt)
 		{
 			float delta = (p->currentTime) / (mpDescriptor->fadeInTime);
 			color = glm::mix(mpDescriptor->initialColor, mpDescriptor->midColor, delta);
+			p->billboard.color = color;
 
 		}
 		// Phase 2 - Mid:     from t = [fadeInTime, lifeTime - fadeOutTime]
@@ -149,17 +150,16 @@ void ParticleSystem::Update(float dt)
 			&& p->currentTime < (mpDescriptor->totalLifetime - mpDescriptor->fadeOutTime))
 		{
 			color = mpDescriptor->midColor;
+			p->billboard.color = color;
 		}
 		else if (p->currentTime >= mpDescriptor->fadeOutTime
 			&& p->currentTime <= mpDescriptor->totalLifetime)
 		{
 			float delta = (p->currentTime - mpDescriptor->fadeOutTime) / (mpDescriptor->totalLifetime - mpDescriptor->fadeOutTime);
 			color = glm::mix(mpDescriptor->midColor, mpDescriptor->endColor, delta);
-
+			p->billboard.color = color;
 		}
-
-        p->billboard.color = color;
-
+       
         // ...
         
         // Do not touch code below...

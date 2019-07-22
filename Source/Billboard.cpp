@@ -181,30 +181,23 @@ void BillboardList::Update(float dt)
         
         // First triangle
         // Top left
-        mVertexBuffer[firstVertexIndex].position = b->position + 0.5f*b->size.y * bUp - 0.5f*b->size.x * bRight;
-        
+        mVertexBuffer[firstVertexIndex].position = b->position + 0.5f*b->size.y * bUp - 0.5f*b->size.x * bRight;       
         // Bottom Left
         mVertexBuffer[firstVertexIndex + 1].position = b->position - 0.5f*b->size.y * bUp - 0.5f*b->size.x * bRight;
-
         
         // Top Right
         mVertexBuffer[firstVertexIndex + 2].position = b->position + 0.5f*b->size.y * bUp + 0.5f*b->size.x * bRight;
-
         
         // Second Triangle
         // Top Right
         mVertexBuffer[firstVertexIndex + 3].position = b->position + 0.5f*b->size.y * bUp + 0.5f*b->size.x * bRight;
 
-        
         // Bottom Left
         mVertexBuffer[firstVertexIndex + 4].position = b->position - 0.5f*b->size.y * bUp - 0.5f*b->size.x * bRight;
-
-        
+       
         // Bottom Right
         mVertexBuffer[firstVertexIndex + 5].position = b->position - 0.5f*b->size.y * bUp + 0.5f*b->size.x * bRight;
-
-
-        
+       
         // do not touch this...
         firstVertexIndex += 6;
     }
