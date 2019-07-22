@@ -14,7 +14,7 @@ struct GLFWwindow;
 // Include GLEW - OpenGL Extension Wrangler
 #define GLEW_STATIC 1
 #include <GL/glew.h>
-#include <string>
+
 #include <vector>
 #include <glm/glm.hpp>
 
@@ -24,6 +24,7 @@ enum ShaderType
 	SHADER_SOLID_COLOR,
 	SHADER_PATH_LINES,
 	SHADER_BLUE,
+    SHADER_TEXTURED,
 	NUM_SHADERS
 };
 

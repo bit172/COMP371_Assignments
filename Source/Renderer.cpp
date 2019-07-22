@@ -87,6 +87,11 @@ void Renderer::Initialize()
                             shaderPathPrefix + "BlueColor.fragmentshader")
                                );
     
+    sShaderProgramID.push_back(
+                               LoadShaders(shaderPathPrefix + "Texture.vertexshader",
+                                           shaderPathPrefix + "Texture.fragmentshader")
+                               );
+
 	sCurrentShader = 0;
 
 }
