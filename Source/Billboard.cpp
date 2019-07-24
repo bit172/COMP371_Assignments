@@ -165,8 +165,8 @@ void BillboardList::Update(float dt)
 		// Extracting view matrix vectors
 		mat4 tViewMatrix = glm::transpose(currentCamera->GetViewMatrix());
 		
-		vec3 up = tViewMatrix[0];
-		vec3 right = tViewMatrix[1];
+		vec3 up = tViewMatrix[1];
+		vec3 right = tViewMatrix[0];
 		vec3 lookAt = tViewMatrix[2];
 		
 		// Rotation matrix along lookAt Vector
