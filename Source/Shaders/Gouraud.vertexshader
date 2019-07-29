@@ -1,0 +1,105 @@
+#version 330 core
+
+// Input vertex data, different for all executions of this shader.
+layout(location = 0) in vec3 vertexPosition_modelspace;
+layout(location = 1) in vec3 vertexNormal_modelspace;  // You will need this when you do lighting
+layout(location = 2) in vec3 vertexColor; 
+
+// output to Fragment Shader
+out vec3 v_color;
+
+// Uniform
+// Values that stay constant for the whole mesh.
+uniform mat4 WorldTransform;
+uniform mat4 ViewTransform;
+uniform mat4 ProjectonTransform;
+
+
+// Light and Material Uniform Variables
+uniform vec4 WorldLightPosition; // if w = 1: Point light, if w = 0: directional light
+uniform vec4 materialCoefficients; // x: ambient   y: diffuse   z: specular   w: specular exponent
+
+uniform vec3 lightColor;
+uniform vec3 lightAttenuation; // x: kC  y: kL  z: kQ
+
+void main()
+{
+	mat4 MV = ViewTransform * WorldTransform;
+	mat4 MVP = ProjectonTransform * MV;
+
+	// Output position of the vertex, in clip space : MVP * position
+	gl_Position =  MVP * vec4(vertexPosition_modelspace,1);
+	v_color = vertexColor;
+
+
+	// Implement Gouraud shading here...
+
+	// Vertex Position in World Space
+	vec3 vertexPosition_worldspace = vec3(WorldTransform * vec4(vertexPosition_modelspace,1.0f));
+
+	// Light Vector (changes based on point/directional light)
+	vec3 L = vec3(0.0f,0.0f,0.0f);
+	
+	// Vertex Normal
+	vec3 N = normalize(mat3(transpose(inverse(WorldTransform))) * vertexNormal_modelspace);
+
+	// Ambient
+	vec3 Ia = vec3(0.0f,0.0f,0.0f);
+	
+	// Diffuse
+	vec3 Id = vec3(0.0f,0.0f,0.0f);
+
+	// Specular
+	vec3 Is = vec3(0.0f,0.0f,0.0f);
+	// Point Light
+	if (WorldLightPosition.w == 1.0f)
+	{	
+		vec3 L = normalize((vec3(WorldLightPosition) - vertexPosition_worldspace));
+
+		// Ambient
+		Ia = materialCoefficients.x * lightColor;
+
+		float cosTheta = max(dot(N,L), 0.0);
+		float d = length(vec3(WorldLightPosition) - vertexPosition_worldspace);
+		float fAttenuation = 1.0 / (lightAttenuation.x + lightAttenuation.y * d + lightAttenuation.z * (d * d));
+		// Diffuse
+		Id = fAttenuation * materialCoefficients.y * cosTheta * lightColor;
+
+		// Specular	
+		vec3 V = normalize(vec3(transpose(ViewTransform)[3]) - vertexPosition_worldspace);
+		vec3 R = reflect(-L,N);
+		float cosPhi = max(dot(V, R), 0.0);
+		Is = fAttenuation * materialCoefficients.z * pow(cosPhi, materialCoefficients.w) * lightColor;
+
+		v_color = (Ia + Id + Is) * vertexColor;
+	}
+
+	// Directional Light
+	else if (WorldLightPosition.w == 0.0f)
+	{	
+		vec3 L = normalize(vec3(WorldLightPosition));
+
+		// Ambient
+		Ia = materialCoefficients.x * lightColor;
+		
+		// Diffuse
+		float cosTheta = max(dot(N,L), 0.0);
+		Id = materialCoefficients.y * cosTheta * lightColor;
+
+		// Specular
+
+		vec3 V = normalize(vec3(transpose(ViewTransform)[3]) - vertexPosition_worldspace);
+		vec3 R = reflect(-L,N);
+		float cosPhi = max(dot(V,R), 0.0);
+		Is = materialCoefficients.z * pow(cosPhi, materialCoefficients.w) * lightColor;
+
+		v_color = (Ia + Id + Is) * vertexColor;
+	}
+
+	
+	// ...
+
+
+	// This should be the final color on the Vertex, including the lighting
+	
+}
