@@ -47,10 +47,10 @@ void main()
 
 		// Specular
 		vec3 R = reflect(-normalize(L), normal);
-		float cosPhi = max(dot(normalize(eyeVector), R), 0.0);
-		Is = fAttenuation * materialCoefficients.z * pow(cosPhi, materialCoefficients.w) * lightColor;
+		float spec = pow(max(dot(normalize(eyeVector), R), 0.0), materialCoefficients.w);
+		Is = fAttenuation * materialCoefficients.z * spec * lightColor;
 
-		color = (Ia + Id + Is) * v_color;
+		color = ((Ia + Id) * v_color) + Is;
 	}
 	else if(lightVector.w == 0.0f)
 	{
@@ -64,9 +64,9 @@ void main()
 
 		// Specular
 		vec3 R = reflect(-normalize(L), normal);
-		float cosPhi = max(dot(normalize(eyeVector), R), 0.0);
-		Is = materialCoefficients.z * pow(cosPhi, materialCoefficients.w) * lightColor;
+		float spec = pow(max(dot(normalize(eyeVector), R), 0.0), materialCoefficients.w);
+		Is = materialCoefficients.z * spec * lightColor;
 
-		color = (Ia + Id + Is) * v_color;
+		color = ((Ia + Id) * v_color) + Is;
 	}
 }

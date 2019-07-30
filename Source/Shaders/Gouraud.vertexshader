@@ -31,72 +31,55 @@ void main()
 	gl_Position =  MVP * vec4(vertexPosition_modelspace,1);
 	v_color = vertexColor;
 
-
 	// Implement Gouraud shading here...
 
 	// Vertex Position in World Space
-	vec3 vertexPosition_worldspace = vec3(WorldTransform * vec4(vertexPosition_modelspace,1.0f));
-
+	vec3 vertexPosition_viewspace = vec3(MV * vec4(vertexPosition_modelspace,1.0f));
+	// Light Position in viewspace
+	vec3 ViewLightPosition = (ViewTransform * WorldLightPosition).xyz;
 	// Light Vector (changes based on point/directional light)
 	vec3 L = vec3(0.0f,0.0f,0.0f);
-	
-	// Vertex Normal
-	vec3 N = normalize(mat3(transpose(inverse(WorldTransform))) * vertexNormal_modelspace);
-
+	// Normal in viewspace
+	vec3 N = normalize(mat3(transpose(inverse(MV))) * vertexNormal_modelspace);
 	// Ambient
 	vec3 Ia = vec3(0.0f,0.0f,0.0f);
-	
 	// Diffuse
-	vec3 Id = vec3(0.0f,0.0f,0.0f);
-
+	vec3 Id = vec3(0.0f,0.0f,0.0f);	
 	// Specular
+	vec3 V = vec3(0.0f,0.0f,0.0f);
+	vec3 R = vec3(0.0f,0.0f,0.0f);
+	float spec = 0.0f;
 	vec3 Is = vec3(0.0f,0.0f,0.0f);
-	// Point Light
+
+	// Point
 	if (WorldLightPosition.w == 1.0f)
-	{	
-		vec3 L = normalize((vec3(WorldLightPosition) - vertexPosition_worldspace));
-
-		// Ambient
+	{
+		L = normalize(ViewLightPosition - vertexPosition_viewspace);
 		Ia = materialCoefficients.x * lightColor;
-
-		float cosTheta = max(dot(N,L), 0.0);
-		float d = length(vec3(WorldLightPosition) - vertexPosition_worldspace);
-		float fAttenuation = 1.0 / (lightAttenuation.x + lightAttenuation.y * d + lightAttenuation.z * (d * d));
-		// Diffuse
+		float cosTheta = max(dot(N,L),0.0);
+		float d = length(ViewLightPosition - vertexPosition_viewspace);
+		float fAttenuation = 1.0/(lightAttenuation.x + lightAttenuation.y * d + lightAttenuation.z * (d * d));
 		Id = fAttenuation * materialCoefficients.y * cosTheta * lightColor;
-
-		// Specular	
-		vec3 V = normalize(vec3(transpose(ViewTransform)[3]) - vertexPosition_worldspace);
-		vec3 R = reflect(-L,N);
-		float cosPhi = max(dot(V, R), 0.0);
-		Is = fAttenuation * materialCoefficients.z * pow(cosPhi, materialCoefficients.w) * lightColor;
-
-		v_color = (Ia + Id + Is) * vertexColor;
+		V = normalize(transpose(ViewTransform)[3].xyz - vertexPosition_viewspace); 
+		R = reflect(-L,N);
+		spec = pow(max(dot(V,R), 0.0), materialCoefficients.w);
+		Is = fAttenuation * materialCoefficients.z * spec * lightColor;
+		v_color = ((Ia + Id) * vertexColor) + Is;
 	}
-
-	// Directional Light
+	
+	// Directional
 	else if (WorldLightPosition.w == 0.0f)
-	{	
-		vec3 L = normalize(vec3(WorldLightPosition));
-
-		// Ambient
+	{
+		L = normalize(ViewLightPosition);
 		Ia = materialCoefficients.x * lightColor;
-		
-		// Diffuse
 		float cosTheta = max(dot(N,L), 0.0);
 		Id = materialCoefficients.y * cosTheta * lightColor;
-
-		// Specular
-
-		vec3 V = normalize(vec3(transpose(ViewTransform)[3]) - vertexPosition_worldspace);
-		vec3 R = reflect(-L,N);
-		float cosPhi = max(dot(V,R), 0.0);
-		Is = materialCoefficients.z * pow(cosPhi, materialCoefficients.w) * lightColor;
-
-		v_color = (Ia + Id + Is) * vertexColor;
+		V = normalize(transpose(ViewTransform)[3].xyz - vertexPosition_viewspace); 
+		R = reflect(-L,N);
+		spec = pow(max(dot(V,R), 0.0), materialCoefficients.w);
+		Is = materialCoefficients.z * spec * lightColor;
+		v_color = ((Ia + Id) * vertexColor) + Is;
 	}
-
-	
 	// ...
 
 
