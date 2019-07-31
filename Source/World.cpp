@@ -199,21 +199,71 @@ void World::Draw()
 
 	// This looks for the MVP Uniform variable in the Vertex Program
 	GLuint VPMatrixLocation = glGetUniformLocation(Renderer::GetShaderProgramID(), "ViewProjectionTransform");
-
+	GLuint VMatrixLocation = glGetUniformLocation(Renderer::GetShaderProgramID(), "ViewTransform");
+	GLuint MaterialID = glGetUniformLocation(Renderer::GetShaderProgramID(), "materialCoefficients");
+	GLuint ParticleMaterialID = glGetUniformLocation(Renderer::GetShaderProgramID(), "PmaterialCoefficients");
+	GLuint LightPositionID = glGetUniformLocation(Renderer::GetShaderProgramID(), "WorldLightPosition");
+	GLuint LightColorID = glGetUniformLocation(Renderer::GetShaderProgramID(), "lightColor");
+	GLuint LightAttenuationID = glGetUniformLocation(Renderer::GetShaderProgramID(), "lightAttenuation");
 	// Send the view projection constants to the shader
 	mat4 VP = mCamera[mCurrentCamera]->GetViewProjectionMatrix();
 	glUniformMatrix4fv(VPMatrixLocation, 1, GL_FALSE, &VP[0][0]);
 
+	mat4 V = mCamera[mCurrentCamera]->GetViewMatrix();
+	glUniformMatrix4fv(VMatrixLocation, 1, GL_FALSE, &V[0][0]);
+	// Light Source and constants
+	const vec3 lightColor(1.0f, 1.0f, 1.0f);
+	const float lightKc = 0.05f;
+	const float lightKl = 0.02f;
+	const float lightKq = 0.002f;
+	const vec4 lightPosition(0.0f, 10.0f, 20.0f, 1.0f); // If w = 1.0f, we have a point light
+//  const vec4 lightPosition(0.0f, 10.0f, 20.0f, 0.0f); // If w = 0.0f, we have a directional light
+
 	// Draw models
 	for (vector<Model*>::iterator it = mModel.begin(); it < mModel.end(); ++it)
-	{
+	{	
+		if ((*it)->GetMaterialCoefficients().length > 0)
+		{	
+			float ka = (*it)->GetMaterialCoefficients().x;
+			float kd = (*it)->GetMaterialCoefficients().y;
+			float ks = (*it)->GetMaterialCoefficients().z;
+			float n = (*it)->GetMaterialCoefficients().w;
+			glUniform4f(MaterialID, ka, kd, ks, n);
+			glUniform4f(LightPositionID, lightPosition.x, lightPosition.y, lightPosition.z, lightPosition.w);
+			glUniform3f(LightColorID, lightColor.r, lightColor.g, lightColor.b);
+			glUniform3f(LightAttenuationID, lightKc, lightKl, lightKq);
+		}
 		(*it)->Draw();
+	}
+
+	unsigned int prevShader = Renderer::GetCurrentShader();
+
+	Renderer::SetShader(SHADER_TEXTURED);
+	glUseProgram(Renderer::GetShaderProgramID());
+
+	Renderer::CheckForErrors();
+
+	for (vector<ParticleDescriptor*>::iterator it = mParticleDescriptorList.begin(); it < mParticleDescriptorList.end(); ++it)
+	{
+		if ((*it)->GetMaterialCoefficients().length > 0)
+		{				
+			float ka = (*it)->GetMaterialCoefficients().x;
+			float kd = (*it)->GetMaterialCoefficients().y;
+			float ks = (*it)->GetMaterialCoefficients().z;
+			float n = (*it)->GetMaterialCoefficients().w;
+
+			glUniformMatrix4fv(VMatrixLocation, 1, GL_FALSE, &V[0][0]);
+			glUniform4f(MaterialID, ka, kd, ks, n);
+			glUniform4f(LightPositionID, lightPosition.x, lightPosition.y, lightPosition.z, lightPosition.w);
+			glUniform3f(LightColorID, lightColor.r, lightColor.g, lightColor.b);
+			glUniform3f(LightAttenuationID, lightKc, lightKl, lightKq);
+		}
 	}
 
 	// Draw Path Lines
 	
 	// Set Shader for path lines
-	unsigned int prevShader = Renderer::GetCurrentShader();
+	
 	Renderer::SetShader(SHADER_PATH_LINES);
 	glUseProgram(Renderer::GetShaderProgramID());
 
@@ -226,6 +276,9 @@ void World::Draw()
 		mat4 VP = mCamera[mCurrentCamera]->GetViewProjectionMatrix();
 		glUniformMatrix4fv(VPMatrixLocation, 1, GL_FALSE, &VP[0][0]);
 
+		mat4 V = mCamera[mCurrentCamera]->GetViewMatrix();
+		glUniformMatrix4fv(VMatrixLocation, 1, GL_FALSE, &V[0][0]);
+
 		(*it)->Draw();
 	}
 
@@ -233,6 +286,9 @@ void World::Draw()
 	{
 		mat4 VP = mCamera[mCurrentCamera]->GetViewProjectionMatrix();
 		glUniformMatrix4fv(VPMatrixLocation, 1, GL_FALSE, &VP[0][0]);
+
+		mat4 V = mCamera[mCurrentCamera]->GetViewMatrix();
+		glUniformMatrix4fv(VMatrixLocation, 1, GL_FALSE, &V[0][0]);
 
 		(*it)->Draw();
 	}

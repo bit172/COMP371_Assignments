@@ -23,7 +23,7 @@ public:
     ParticleDescriptor();
     void Load(ci_istringstream& iss);
     bool ParseLine(std::vector<ci_string> token);
-
+	glm::vec4 GetMaterialCoefficients() const { return materialCoefficients; }
     ci_string GetName() { return name; }
     
 private:
@@ -49,6 +49,8 @@ private:
     float fadeOutTime;                      // time from mid to end stage
     float totalLifetime;                    // amount of time in seconds the particle will remain alive
     float totalLifetimeRandomness;
-    
+
+	glm::vec4 materialCoefficients;
+	
     friend class ParticleSystem;
 };

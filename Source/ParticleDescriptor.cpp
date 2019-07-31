@@ -164,6 +164,16 @@ bool ParticleDescriptor::ParseLine(vector<ci_string> token)
         
         totalLifetimeRandomness = static_cast<float>(atof(token[2].c_str()));
     }
+	else if (token[0] == "materialCoefficients")
+		{
+		assert(token.size() > 2);
+		assert(token[1] == "=");
+
+		materialCoefficients.x = static_cast<float>(atof(token[2].c_str()));
+		materialCoefficients.y = static_cast<float>(atof(token[3].c_str()));
+		materialCoefficients.z = static_cast<float>(atof(token[4].c_str()));
+		materialCoefficients.w = static_cast<float>(atof(token[5].c_str()));
+		}
     else
     {
         fprintf(stderr, "Error loading scene file... token:  %s!", token[0].c_str());

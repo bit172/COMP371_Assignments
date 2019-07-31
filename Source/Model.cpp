@@ -21,7 +21,7 @@ using namespace glm;
 
 Model::Model() 
 : mName("UNNAMED"), mPosition(0.0f, 0.0f, 0.0f), mScaling(1.0f, 1.0f, 1.0f), mRotationAxis(0.0f, 1.0f, 0.0f),
-  mRotationAngleInDegrees(0.0f), mAnimation(nullptr)
+  mRotationAngleInDegrees(0.0f),materialCoefficients(0.0f,0.0f,0.0f,0.0f), mAnimation(nullptr)
 {
 }
 
@@ -127,6 +127,16 @@ bool Model::ParseLine(const std::vector<ci_string> &token)
             ParticleSystem* ps = new ParticleSystem(emitter, desc);
             World::GetInstance()->AddParticleSystem(ps);
         }
+		else if (token[0] == "materialCoefficients")
+		{
+			assert(token.size() > 2);
+			assert(token[1] == "=");
+
+			materialCoefficients.x = static_cast<float>(atof(token[2].c_str()));
+			materialCoefficients.y = static_cast<float>(atof(token[3].c_str()));
+			materialCoefficients.z = static_cast<float>(atof(token[4].c_str()));
+			materialCoefficients.w = static_cast<float>(atof(token[5].c_str()));
+		}
 		else
 		{
 			return false;
