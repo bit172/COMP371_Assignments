@@ -1,0 +1,67 @@
+#version 330 core
+
+// Ouput to fragment shader
+out vec3 color;
+
+uniform vec4 materialCoefficients;
+uniform vec3 lightColor;
+uniform vec3 lightAttenuation; // x: kC  y: kL  z: kQ
+
+
+
+in vec4 v_color;
+in vec3 normal; // You will need this when you do per-fragment lighting
+in vec3 eyeVector;       // Vector from the vertex to the Camera in View Space
+in vec4 lightVector;     // Vector from the vertex to the Light in View Space
+						 // Length of lightVector is the distance between light and vertex
+						 // if w = 1: Point light, if w = 0: directional light
+
+void main()
+{
+// Implment Phong Shading based on the parameters above
+	vec3 L = lightVector.xyz;
+	// Ambient
+	vec3 Ia = vec3(0.0f,0.0f,0.0f);
+	
+	// Diffuse
+	vec3 Id = vec3(0.0f,0.0f,0.0f);
+
+	// Specular
+	vec3 Is = vec3(0.0f,0.0f,0.0f);
+
+	
+    if(lightVector.w == 1.0f)
+	{
+		Ia = materialCoefficients.x * lightColor;
+
+		float cosTheta = max(dot(normal,normalize(L)), 0.0);
+		float d = length(L);
+		float fAttenuation = 1.0 / (lightAttenuation.x + lightAttenuation.y * d + lightAttenuation.z * (d * d));
+		// Diffuse
+		Id = fAttenuation * materialCoefficients.y * cosTheta * lightColor;
+
+		// Specular
+		vec3 R = reflect(-normalize(L), normal);
+		float spec = pow(max(dot(normalize(eyeVector), R), 0.0), materialCoefficients.w);
+		Is = fAttenuation * materialCoefficients.z * spec * lightColor;
+
+		color = ((Ia + Id) * vec3(v_color)) + Is;
+	}
+	else if(lightVector.w == 0.0f)
+	{
+		Ia = materialCoefficients.x * lightColor;
+
+		float cosTheta = max(dot(normal,normalize(L)), 0.0);
+		// Remember that directional light don't have attenuation
+
+		// Diffuse
+		Id = materialCoefficients.y * cosTheta * lightColor;
+
+		// Specular
+		vec3 R = reflect(-normalize(L), normal);
+		float spec = pow(max(dot(normalize(eyeVector), R), 0.0), materialCoefficients.w);
+		Is = materialCoefficients.z * spec * lightColor;
+
+		color = ((Ia + Id) * vec3(v_color)) + Is;
+	}
+}
