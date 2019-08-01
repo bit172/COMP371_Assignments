@@ -71,7 +71,7 @@ name     = "Ground"
 scaling  = 100.0 100.0 100.0
 position = 0.0 -50 0.0
 rotation = 1.0 0.0 0.0 90.0
-materialCoefficients = 0.2 0.8 0.2 50
+materialCoefficients = 0.2 0.8 0.2 40
 
 [ParticleDescriptor]
 name        = "Fountain"
@@ -100,7 +100,7 @@ position = 0.0 1.0 0.0
 rotation = 0.0 0.0 1.0 180
 animation = "BackAndForth"
 particleEmitter = "Fountain"
-materialCoefficients = 0.01 0.8 0.0 0.0
+materialCoefficients = 0.10 0.8 0.0 0.0
 
 [ParticleDescriptor]
 name        = "Smoke"
@@ -120,12 +120,12 @@ fadeInTime = 0.7
 fadeOutTime = 3.5
 totalLifetime = 5.5
 totalLifetimeRandomness = 0.0
-materialCoefficients = 0.3 0.8 0.0 0.0
+materialCoefficients = 0.3 0.5 0.0 0.0
 
 [Sphere]
 name     = "Sphere"
 position = 10.0 2.0 0.0
 animation = "CycleAnim"
 particleEmitter = "Smoke"
-materialCoefficients = 0.01 0.8 0.3 50.0
+materialCoefficients = 0.10 0.8 0.3 50.0
 

@@ -199,18 +199,22 @@ void World::Draw()
 
 	// This looks for the MVP Uniform variable in the Vertex Program
 	GLuint VPMatrixLocation = glGetUniformLocation(Renderer::GetShaderProgramID(), "ViewProjectionTransform");
+	// View Matrix
 	GLuint VMatrixLocation = glGetUniformLocation(Renderer::GetShaderProgramID(), "ViewTransform");
+	// Material Coefficients
 	GLuint MaterialID = glGetUniformLocation(Renderer::GetShaderProgramID(), "materialCoefficients");
-	GLuint ParticleMaterialID = glGetUniformLocation(Renderer::GetShaderProgramID(), "PmaterialCoefficients");
+	// Light Data
 	GLuint LightPositionID = glGetUniformLocation(Renderer::GetShaderProgramID(), "WorldLightPosition");
 	GLuint LightColorID = glGetUniformLocation(Renderer::GetShaderProgramID(), "lightColor");
 	GLuint LightAttenuationID = glGetUniformLocation(Renderer::GetShaderProgramID(), "lightAttenuation");
+	
 	// Send the view projection constants to the shader
 	mat4 VP = mCamera[mCurrentCamera]->GetViewProjectionMatrix();
 	glUniformMatrix4fv(VPMatrixLocation, 1, GL_FALSE, &VP[0][0]);
 
 	mat4 V = mCamera[mCurrentCamera]->GetViewMatrix();
 	glUniformMatrix4fv(VMatrixLocation, 1, GL_FALSE, &V[0][0]);
+	
 	// Light Source and constants
 	const vec3 lightColor(1.0f, 1.0f, 1.0f);
 	const float lightKc = 0.05f;
@@ -240,8 +244,18 @@ void World::Draw()
 
 	Renderer::SetShader(SHADER_TEXTURED);
 	glUseProgram(Renderer::GetShaderProgramID());
-
 	Renderer::CheckForErrors();
+
+	// View Matrix
+	VMatrixLocation = glGetUniformLocation(Renderer::GetShaderProgramID(), "ViewTransform");
+	// Material Coefficients
+	MaterialID = glGetUniformLocation(Renderer::GetShaderProgramID(), "materialCoefficients");
+	// Light Data
+	LightPositionID = glGetUniformLocation(Renderer::GetShaderProgramID(), "WorldLightPosition");
+	LightColorID = glGetUniformLocation(Renderer::GetShaderProgramID(), "lightColor");
+	LightAttenuationID = glGetUniformLocation(Renderer::GetShaderProgramID(), "lightAttenuation");
+
+	
 
 	for (vector<ParticleDescriptor*>::iterator it = mParticleDescriptorList.begin(); it < mParticleDescriptorList.end(); ++it)
 	{
@@ -276,9 +290,6 @@ void World::Draw()
 		mat4 VP = mCamera[mCurrentCamera]->GetViewProjectionMatrix();
 		glUniformMatrix4fv(VPMatrixLocation, 1, GL_FALSE, &VP[0][0]);
 
-		mat4 V = mCamera[mCurrentCamera]->GetViewMatrix();
-		glUniformMatrix4fv(VMatrixLocation, 1, GL_FALSE, &V[0][0]);
-
 		(*it)->Draw();
 	}
 
@@ -286,9 +297,6 @@ void World::Draw()
 	{
 		mat4 VP = mCamera[mCurrentCamera]->GetViewProjectionMatrix();
 		glUniformMatrix4fv(VPMatrixLocation, 1, GL_FALSE, &VP[0][0]);
-
-		mat4 V = mCamera[mCurrentCamera]->GetViewMatrix();
-		glUniformMatrix4fv(VMatrixLocation, 1, GL_FALSE, &V[0][0]);
 
 		(*it)->Draw();
 	}
